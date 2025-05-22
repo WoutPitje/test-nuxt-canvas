@@ -1,27 +1,20 @@
-
 name: studio-nuxt-build
 run-name: studio nuxt build
 
 on:
-  # Runs on pushes targeting the default branch
   push:
     branches:
       - 'main'
-
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# Add write workflow permissions
 permissions:
   contents: write
 
-# Allow one concurrent deployment
 concurrency:
   group: "pages"
   cancel-in-progress: true
 
 jobs:
-  # Build job
   build-and-deploy:
     runs-on: ${{ matrix.os }}
     defaults:
@@ -52,19 +45,20 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          version: ${{ matrix.node }}
+          node-version: ${{ matrix.node }}
           cache: ${{ steps.pkgman.outputs.cache }}
 
       - name: Install dependencies
         run: ${{ steps.pkgman.outputs.package_manager }} install
 
-      - name: Generate
+      - name: Rebuild better-sqlite3 for Linux
+        run: pnpm rebuild better-sqlite3
+
+      - name: Build with Nuxt
         run: npx nuxi build --preset github_pages
         env:
           NUXT_CONTENT_PREVIEW_API: https://api.nuxt.studio
-          
 
-      # Deployment job
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4
         with:
